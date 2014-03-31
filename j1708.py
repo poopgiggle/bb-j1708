@@ -130,7 +130,7 @@ class J1708():
 		thismsg += chksum
 		with self.buslock:
 			retval = self._sport.write(thismsg)
-
+			self._sport.flushInput()#solve "echo" problem
 		return retval
      
 	def __del__(self):
