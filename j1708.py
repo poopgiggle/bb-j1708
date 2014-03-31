@@ -21,7 +21,7 @@ def toSignedChar(num):
 
 def checksum(msg):
 	if type(msg[0]) is bytes:
-		thismsg = list(map(lambda x: int.from_bytes(x,byteorder='big',msg)))
+		thismsg = list(map(lambda x: int.from_bytes(x,byteorder='big'),msg))
 	else:
 		thismsg = msg
 	return toSignedChar(~reduce(lambda x,y: (x + y) & 0xFF, list(thismsg)) + 1)
