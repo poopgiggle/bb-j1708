@@ -20,11 +20,7 @@ def toSignedChar(num):
 		return struct.unpack('b',struct.pack('B',num & 0xFF))[0]
 
 def checksum(msg):
-	if type(msg[0]) is bytes:
-		thismsg = list(map(lambda x: int.from_bytes(x,byteorder='big'),msg))
-	else:
-		thismsg = msg
-	return toSignedChar(~reduce(lambda x,y: (x + y) & 0xFF, list(thismsg)) + 1)
+	return toSignedChar(~reduce(lambda x,y: (x + y) & 0xFF, list(msg)) + 1)
 
 def check(msg):
 	if type(msg[0]) is bytes:
@@ -86,6 +82,7 @@ def getmsg(busport,buslock):
 	busport.timeout=ttimeout
 	buslock.release()
 	if not check(msg[:-1]) + toSignedChar(msg[-1]) == 0:
+#		initialize(busport,buslock)
 		return None
 	else:
 		return msg
@@ -120,7 +117,7 @@ class J1708():
 
 		retval = self.mypipe.recv()
 
-		return retval
+		return list(retval)
 
     #currently relying on the read_thread to maintain synchronization
 	def send_message(self,msg):
@@ -130,8 +127,16 @@ class J1708():
 		thismsg += chksum
 		with self.buslock:
 			retval = self._sport.write(thismsg)
-			self._sport.flushInput()#solve "echo" problem
+			initialize(self._sport,self.buslock)
 		return retval
+
+	#cheater method for porting existing RP1210 code where the first byte of the buffer is the priority
+	#however we don't care about priority really so just ignore the first byte
+	def rp1210_send_message(self,msg):
+		return self.send_message(msg[1:])
+
+	def rp1210_read_message(self,timeout=None):
+		return [0xde,0xad,0xbe,0xef]+self.read_message(timeout=timeout)
      
 	def __del__(self):
 		self.r_proc.terminate()
@@ -144,16 +149,16 @@ if __name__ == "__main__":
 	while count < 50:
 		a = thisport.read_message()
 		if a is not None:
-			print(a)
+			#print(a)
+			print(list(map(hex,a)))
 		count += 1
 
-	thisport.send_message([0xac,0xfe,0x80,0xf0,0x17])#SecuritySetup message for CAT ECM.
-	                                                 #If all is well, will see a response setup
+	thisport.send_message([0xac,0xfe,0x80,0xf0,0x17])
 	count = 0
 	while count < 50:
 		a = thisport.read_message()
 		if a is not None:
-			print(a)
+			print(list(map(hex,a)))
 		count += 1
 
 	del(thisport)
