@@ -127,7 +127,7 @@ class J1708():
 		thismsg += chksum
 		with self.buslock:
 			retval = self._sport.write(thismsg)
-			initialize(self._sport,self.buslock)
+#			initialize(self._sport,self.buslock)
 		return retval
 
 	#cheater method for porting existing RP1210 code where the first byte of the buffer is the priority
@@ -149,8 +149,8 @@ if __name__ == "__main__":
 	while count < 50:
 		a = thisport.read_message()
 		if a is not None:
-			#print(a)
-			print(list(map(hex,a)))
+			print(a)
+			#print(list(map(hex,a)))
 		count += 1
 
 	thisport.send_message([0xac,0xfe,0x80,0xf0,0x17])
@@ -158,7 +158,8 @@ if __name__ == "__main__":
 	while count < 50:
 		a = thisport.read_message()
 		if a is not None:
-			print(list(map(hex,a)))
+			#print(list(map(hex,a)))
+                        print(a)
 		count += 1
 
 	del(thisport)
