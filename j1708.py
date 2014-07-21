@@ -38,7 +38,7 @@ def initialize(busport,buslock):
 	busport.timeout = 0
 	while not synced:
 		#print(time.clock())
-		a = busport.read(1)
+#		a = busport.read(1)
 		if not GPIO.input("GPIO1_28"):
 			qtime = time.time()
 		elif time.time() - qtime < TENBITTIMES:
