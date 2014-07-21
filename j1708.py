@@ -7,11 +7,12 @@ import time
 from multiprocessing import Process, Pipe, Lock
 from functools import reduce
 import struct
-
+import Adafruit_BBIO.GPIO as GPIO
 #TODO: need a thread that monitors the J1708 bus and continually places messages in the receive buffer.
 #      upon initialization, thread needs to spawn and synchronize itself with the J1708 bus.
 
 TENBITTIMES = .0010417
+GPIO.setup("GPIO1_28",GPIO.IN)
 
 def toSignedChar(num):
 	if type(num) is bytes:
@@ -38,7 +39,7 @@ def initialize(busport,buslock):
 	while not synced:
 		#print(time.clock())
 		a = busport.read(1)
-		if not a is b'':
+		if not GPIO.input("GPIO1_28"):
 			qtime = time.time()
 		elif time.time() - qtime < TENBITTIMES:
 			continue
